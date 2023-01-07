@@ -7,13 +7,13 @@ const TableName = process.env.DYNAMODB_BOOK_TABLE;
 const handler = async (event) => {
   try {
     const item = JSON.parse(event.body);
-    const id = randomUUID();
+    const bookId = randomUUID();
     const now = new Date().toISOString();
 
-    const keySchema = { PK: "id" };
+    const keySchema = { PK: "bookId" };
 
     let Item = {
-      [keySchema.PK]: id,
+      [keySchema.PK]: bookId,
       ...item,
       createAt: now,
     };
