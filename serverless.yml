@@ -1,19 +1,51 @@
-service: sls-step-functions-test
+service: sls-step-functions-app
 
 frameworkVersion: "3"
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs16.x
+  stage: dev
+  region: us-west-1
   lambdaHashingVersion: 20201221
+  environment:
+    DYNAMODB_BOOK_TABLE: ${self:custom.bookTableName}
+    DYNAMODB_USER_TABLE: ${self:custom.userTableName}
 
 plugins:
   - serverless-step-functions
+  - serverless-webpack
+
+webpack:
+  config: ./webpack.config.js
+
+custom:
+  bookTableName: book-table-${self:provider.stage}
+  userTableName: user-table-${self:provider.stage}
+
+functions:
+  createBook:
+    handler: src/handlers/createBook.handler
+    timeout: 30
+    memorySize: 512
+    events:
+      - http:
+          path: /books
+          method: POST
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource: !GetAtt bookTable.Arn
+  checkInventoryFn:
+    handler: src/handlers/checkInventory.handler
+  calculateTotalFn:
+    handler: src/handlers/calculateTotal.handler
 
 stepFunctions:
   stateMachines:
     storeCheckoutFlow:
-      name: storeCheckout
+      name: storeCheckoutFlow # this is the name that will appear in the AWS Console
       definition:
         StartAt: checkInventory
         States:
@@ -25,13 +57,34 @@ stepFunctions:
           calculateTotal:
             Type: Task
             Resource:
-              Fn::GetAtt:
-                - calculateTotalFn
-                  Arn
+              Fn::GetAtt: [calculateTotalFn, Arn]
             End: true
 
-functions:
-  checkInventoryFn:
-    handler: handler.checkInventory
-  calculateTotalFn:
-    handler: handler.calculateTotal
+resources:
+  Resources:
+    bookTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.bookTableName}
+        AttributeDefinitions:
+          - AttributeName: bookId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: bookId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    userTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.userTableName}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
