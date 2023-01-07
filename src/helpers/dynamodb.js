@@ -1,8 +1,8 @@
 "use strict";
 
-const { DynamoDb } = require("aws-sdk");
-const dynamodb = new DynamoDb();
-const docClient = new DynamoDb.DocumentClient();
+const { DynamoDB } = require("aws-sdk");
+// const dynamodb = new DynamoDB();
+const docClient = new DynamoDB.DocumentClient();
 
 const putItem = async (TableName, Item) =>
   await docClient.put({ TableName, Item }).promise();

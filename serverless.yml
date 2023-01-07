@@ -15,13 +15,14 @@ provider:
 plugins:
   - serverless-step-functions
   - serverless-webpack
+  - serverless-iam-roles-per-function
 
 webpack:
   config: ./webpack.config.js
 
 custom:
-  bookTableName: book-table-${self:provider.stage}
-  userTableName: user-table-${self:provider.stage}
+  bookTableName: sfn-book-table-${self:provider.stage}
+  userTableName: sfn-user-table-${self:provider.stage}
 
 functions:
   createBook:

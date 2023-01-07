@@ -6,7 +6,9 @@ const TableName = process.env.DYNAMODB_BOOK_TABLE;
 
 const handler = async (event) => {
   try {
+    console.log(`Raw Event === ${event}`);
     const item = JSON.parse(event.body);
+    console.log(`logging item===${item}`);
     const bookId = randomUUID();
     const now = new Date().toISOString();
 
@@ -20,7 +22,7 @@ const handler = async (event) => {
 
     await putItem(TableName, Item);
     return {
-      statusCode,
+      statusCode: 201,
       body: JSON.stringify(body),
       headers: { "Content-Type": contentType },
     };
