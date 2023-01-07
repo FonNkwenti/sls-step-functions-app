@@ -1,0 +1,22 @@
+{
+  "name": "sls-step-functions-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FonNkwenti/sls-step-functions-app.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/FonNkwenti/sls-step-functions-app/issues"
+  },
+  "homepage": "https://github.com/FonNkwenti/sls-step-functions-app#readme",
+  "devDependencies": {
+    "serverless-step-functions": "^3.11.1"
+  }
+}

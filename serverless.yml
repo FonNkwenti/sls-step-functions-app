@@ -1,0 +1,37 @@
+service: sls-step-functions-test
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+
+plugins:
+  - serverless-step-functions
+
+stepFunctions:
+  stateMachines:
+    storeCheckoutFlow:
+      name: storeCheckout
+      definition:
+        StartAt: checkInventory
+        States:
+          checkInventory:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [checkInventoryFn, Arn]
+            Next: calculateTotal
+          calculateTotal:
+            Type: Task
+            Resource:
+              Fn::GetAtt:
+                - calculateTotalFn
+                  Arn
+            End: true
+
+functions:
+  checkInventoryFn:
+    handler: handler.checkInventory
+  calculateTotalFn:
+    handler: handler.calculateTotal
