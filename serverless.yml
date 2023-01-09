@@ -16,6 +16,7 @@ plugins:
   - serverless-step-functions
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-prune-plugin
 
 webpack:
   config: ./webpack.config.js
@@ -23,6 +24,9 @@ webpack:
 custom:
   bookTableName: sfn-book-table-${self:provider.stage}
   userTableName: sfn-user-table-${self:provider.stage}
+  prune:
+    automatic: true
+    number: 2
 
 functions:
   createBook:
@@ -54,11 +58,24 @@ stepFunctions:
             Type: Task
             Resource:
               Fn::GetAtt: [checkInventoryFn, Arn]
+            Catch:
+              - ErrorEquals: [BookNotFound]
+                Next: BookNotFoundError
+              - ErrorEquals: [BookOutOfStock]
+                Next: BookOutOfStockError
             Next: calculateTotal
           calculateTotal:
             Type: Task
             Resource:
               Fn::GetAtt: [calculateTotalFn, Arn]
+            End: true
+          BookNotFoundError:
+            Type: Pass
+            Result: "No such book available"
+            End: true
+          BookOutOfStockError:
+            Type: Pass
+            Result: "Sorry, the book is out of stock"
             End: true
 
 resources:
